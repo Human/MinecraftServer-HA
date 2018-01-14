@@ -3,6 +3,7 @@ Sensor to check the status of a Minecraft server.
 
 """
 import logging
+import socket
 from homeassistant.helpers.entity import Entity
 ATTR_PING = 'Ping'
 ATTR_VERSION = 'Version'
@@ -39,6 +40,9 @@ class MCServerSensor(Entity):
         self._mcserver = mcserver(server)
         self._server = server
         self._name = name
+        self._state = "-1"
+        self._ping = "999"
+        self._version = ""
         self.update()
 
     @property
@@ -54,10 +58,14 @@ class MCServerSensor(Entity):
     # pylint: disable=no-member
     def update(self):
         """Update device state."""
-        status = self._mcserver.lookup(self._server).status()
-        self._state = str(status.players.online)
-        self._ping = self._mcserver.ping()
-        self._version = str(status.version.name)
+        try:
+            status = self._mcserver.lookup(self._server).status()
+            self._state = str(status.players.online)
+            self._ping = self._mcserver.ping()
+            self._version = str(status.version.name)
+        except socket.timeout:
+            logger = logging.getLogger(__name__)
+            logger.warning('Timed out doing update')
 
 
     @property
