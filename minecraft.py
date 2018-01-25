@@ -51,6 +51,11 @@ class MCServerSensor(Entity):
         return self._name
 
     @property
+    def unit_of_measurement(self):
+        """Main metric is player count."""
+        return "players"
+
+    @property
     def state(self):
         """Return the state of the sensor."""
         return self._state
